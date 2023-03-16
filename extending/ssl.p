@@ -10,51 +10,52 @@
  *                                                                    *
  **********************************************************************/
 /*------------------------------------------------------------------------
-    File        : use_error_status_filter.p
-    Purpose     : Using the ErrorStatusFilter
+    File        : ssl.p
+    Purpose     : SSL examples
     Syntax      :
     Description :
     Author(s)   : Peter Judge / Consultingwerk Ltd.
-    Created     : 2023-03-15
+    Created     : 2023-03-16
     Notes       :
   ----------------------------------------------------------------------*/
-
 @lowercase.
+
 
 block-level on error undo, throw.
 
-using extending.* from propath.
-using OpenEdge.Core.* from propath.
-using OpenEdge.Net.* from propath.
 using OpenEdge.Net.HTTP.* from propath.
-using OpenEdge.Net.HTTP.Filter.Writer.* from propath.
-using Progress.Json.ObjectModel.* from propath.
 
-define variable oHttpClient as IHttpClient no-undo.
 define variable oReq as IHttpRequest no-undo.
 define variable oResp as IHttpResponse no-undo.
+define variable oHttpClient as IHttpClient no-undo.
 
-/* Register the status handler */
-StatusCodeWriterBuilder:Registry:Put("404", get-class(ErrorStatusFilter)).
-StatusCodeWriterBuilder:Registry:Put("501", get-class(ErrorStatusFilter)).
-
-/* Make a request */
+/* Create once */
 oHttpClient = ClientBuilder:Build():Client.
 
-oReq = RequestBuilder:Get("http://httpbin.org/status/404")
+/* Results in an error -54 due to no ROOT CA being loaded
+   To fix, open ProEnv and run
+    certutil -import cfg/gts-root-r1.pem
+*/
+
+oReq = RequestBuilder:Get("https://google.com")
         :Request.
 
 /* Make multiple requests */
 oResp = oHttpClient:Execute(oReq).
 
 message
-oResp:StatusCode
-view-as alert-box title "No Error".
+    oResp:StatusCode skip
+    oResp:ContentType skip
+    oResp:ContentLength skip
+    oResp:Entity
+view-as alert-box.
 
 catch err as Progress.Lang.Error:
     message
-    err:GetMessage(1)
-    view-as alert-box title "Caught Error!".
+        err:GetMessage(1) skip
+        err:GetMessage(2) skip
+        err:GetMessage(3) skip
+    view-as alert-box title "ERROR".
 end catch.
 
 

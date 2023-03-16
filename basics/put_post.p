@@ -23,10 +23,10 @@
 
 block-level on error undo, throw.
 
-using OpenEdge.Core.*.
-using OpenEdge.Core.Collections.*.
-using OpenEdge.Net.*.
-using OpenEdge.Net.HTTP.*.
+using OpenEdge.Core.* from propath.
+using OpenEdge.Core.Collections.* from propath.
+using OpenEdge.Net.* from propath.
+using OpenEdge.Net.HTTP.* from propath.
 using Progress.Json.ObjectModel.* from propath.
 
 define variable oHttpClient as IHttpClient no-undo.
@@ -92,8 +92,7 @@ oReq = RequestBuilder:Post(URI:Parse("http://httpbin.org/post"),
         :Request.
 
 /* All variations on the same thing
-oReq = RequestBuilder:Post("http://httpbin.org/post",
-                           oStringBody)
+oReq = RequestBuilder:Post("http://httpbin.org/post", oStringBody)
                   :ContentType("application/x-www-form-urlencoded")
                   :Request.
 

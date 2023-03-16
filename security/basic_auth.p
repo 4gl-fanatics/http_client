@@ -10,12 +10,12 @@
  *                                                                    *
  **********************************************************************/
 /*------------------------------------------------------------------------
-    File        : use_error_status_filter.p
-    Purpose     : Using the ErrorStatusFilter
+    File        : basic_auth.p
+    Purpose     : Using HTTP BASIC authentication
     Syntax      :
     Description :
     Author(s)   : Peter Judge / Consultingwerk Ltd.
-    Created     : 2023-03-15
+    Created     : 2023-03-16
     Notes       :
   ----------------------------------------------------------------------*/
 
@@ -23,38 +23,57 @@
 
 block-level on error undo, throw.
 
-using extending.* from propath.
-using OpenEdge.Core.* from propath.
-using OpenEdge.Net.* from propath.
-using OpenEdge.Net.HTTP.* from propath.
-using OpenEdge.Net.HTTP.Filter.Writer.* from propath.
+using OpenEdge.Core.*.
+using OpenEdge.Net.*.
+using OpenEdge.Net.HTTP.*.
+using OpenEdge.Net.HTTP.Filter.Writer.*.
 using Progress.Json.ObjectModel.* from propath.
+using Progress.Lang.* from propath.
 
 define variable oHttpClient as IHttpClient no-undo.
 define variable oReq as IHttpRequest no-undo.
 define variable oResp as IHttpResponse no-undo.
+define variable oCredentials as Credentials no-undo.
 
-/* Register the status handler */
-StatusCodeWriterBuilder:Registry:Put("404", get-class(ErrorStatusFilter)).
-StatusCodeWriterBuilder:Registry:Put("501", get-class(ErrorStatusFilter)).
+session:debug-alert = no .
+
+log-manager:logfile-name = session:temp-dir + 'basic_auth.log'.
+log-manager:logging-level = 5.
+log-manager:clear-log().
+
 
 /* Make a request */
 oHttpClient = ClientBuilder:Build():Client.
 
-oReq = RequestBuilder:Get("http://httpbin.org/status/404")
+oCredentials = new Credentials("realm", "bob", "sofia").
+
+/* PROVIDE CREDENTIALS. We may not know what the authentication approach is, so let the HttpClient
+   figure it out. This will make 2 requests to the server. */
+oReq = RequestBuilder:Get("http://httpbin.org/basic-auth/bob/sofia")
+        :UsingCredentials(oCredentials)
         :Request.
 
 /* Make multiple requests */
 oResp = oHttpClient:Execute(oReq).
 
 message
-oResp:StatusCode
-view-as alert-box title "No Error".
+oResp:StatusCode skip
+oResp:ContentType skip
+oResp:ContentLength skip
+oResp:Entity
+view-as alert-box.
 
-catch err as Progress.Lang.Error:
-    message
-    err:GetMessage(1)
-    view-as alert-box title "Caught Error!".
-end catch.
+/* USE BASIC AUTH. We know that basic auth is in use, so this provides the credentials , and only 1 call is made */
+oReq = RequestBuilder:Get("http://httpbin.org/basic-auth/bob/sofia")
+        :UsingBasicAuthentication(oCredentials)
+        :Request.
 
+/* Make multiple requests */
+oResp = oHttpClient:Execute(oReq).
 
+message
+oResp:StatusCode skip
+oResp:ContentType skip
+oResp:ContentLength skip
+oResp:Entity
+view-as alert-box.
