@@ -27,7 +27,8 @@
 		"editor.fontSize": 12,
 		"editor.fontLigatures": true,
 		"editor.fontWeight": 450,
-		"editor.formatOnPaste": true
+        "editor.formatOnPaste": true,
+        "editor.detectIndentation": false
 	}
 
 }

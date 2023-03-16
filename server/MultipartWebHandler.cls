@@ -10,13 +10,13 @@
  *                                                                    *
  **********************************************************************/
 /*------------------------------------------------------------------------
-    File        : DatasetWebHandler
+    File        : MultipartWebHandler
     Purpose     : Returns a dataset as JSON
     Syntax      :
     Description :
     Author(s)   : Peter Judge / Consultingwerk Ltd.
     Created     : 2023-03-15
-    Notes       : * Configure as handlerN=server.DatasetWebHandler:/Customers
+    Notes       : * Configure as handlerN=server.MultipartWebHandler:/multipart
                   * Requires the workshop repo on PROPATH
   ----------------------------------------------------------------------*/
 
@@ -24,11 +24,13 @@
 
 block-level on error undo, throw.
 
+using OpenEdge.Net.* from propath.
 using OpenEdge.Web.*.
+using Progress.IO.* from propath.
 using Progress.Json.ObjectModel.* from propath.
 using OpenEdge.Net.HTTP.*.
 
-class server.DatasetWebHandler inherits WebHandler:
+class server.MultipartWebHandler inherits WebHandler:
     define temp-table eCustomer no-undo like Customer.
     define dataset dsCustomer for eCustomer.
 
@@ -58,30 +60,54 @@ class server.DatasetWebHandler inherits WebHandler:
     method override protected integer HandleGet(poRequest as IWebRequest):
         define variable oResp as WebResponse no-undo.
         define variable oWriter as WebResponseWriter no-undo.
-        define variable oBody as JsonObject no-undo.
-        define variable iCustNum as integer no-undo.
+        define variable oMultipartEntity as MultipartEntity no-undo.
+        define variable oPart as MessagePart no-undo.
+        define variable oJson as JsonObject no-undo.
+        define variable oFile as FileInputStream no-undo.
+        define variable oReq as IHttpRequest no-undo.
+        define variable oHeader as HttpHeader no-undo.
 
-        /* Get the data */
-        oBody = new JsonObject().
+        /* The multipart message - the "container" */
+        oMultipartEntity = new MultipartEntity().
+        oMultipartEntity:Boundary = "workshop-server-boundary".    /* optional */
 
-        /* Read the poRequest:PathInfo to figure out what to return */
-        if poRequest:PathInfo begins "/Customers/":u then do:
-            iCustNum = integer(entry(3, poRequest:PathInfo, "/":u)).
+        /* Part 1: Person detail */
+        oJson = new JsonObject().
+        oJson:Add("name", "R. Smith").
+        oJson:Add("dob", 2/29/2004).
 
-            find Customer where Customer.CustNum = iCustNum
-                          no-lock.
+        oHeader = HttpHeaderBuilder:Build("Content-Disposition")
+                        :Value("form-data; name=data")
+                        :Header.
 
-            create eCustomer.
-            buffer-copy Customer to eCustomer.
+        oPart = new MessagePart("application/json", oJson).
+        oPart:Headers:Put(oHeader).
 
-            dataset dsCustomer:write-json("JsonObject":u, oBody).
-        end.
+        oMultipartEntity:AddPart(oPart).
+
+        /* Part 2: Person photo */
+        file-info:file-name = "img/person.png".
+        oFile = new FileInputStream(file-info:full-pathname).
+
+        /* Equivalent to the above HttpHeaderBuilder call */
+        oHeader = HttpHeaderBuilder:Build("Content-Disposition")
+                        :Value("form-data")
+                        :AddParameter("name", "photo")
+                        :AddParameter("fileName*", "person.png")
+                        :Header.
+
+        oPart = new MessagePart("image/png", oFile).
+        oPart:Headers:Put(oHeader).
+        oMultipartEntity:AddPart(oPart).
+
 
         /* Build the response */
         oResp = new WebResponse().
         oResp:StatusCode = 200.
-        oResp:ContentType = "application/prodataset+json":u.
-        oResp:Entity = oBody.
+
+        /* NOTE - the boundary is NOT automatically added */
+        oResp:ContentType = "multipart/form-data; boundary=":u + oMultipartEntity:Boundary.
+        oResp:Entity = oMultipartEntity.
 
         /* Return data */
         oWriter = new WebResponseWriter(oResp).
