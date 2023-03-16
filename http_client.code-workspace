@@ -1,0 +1,33 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../ADE-Sourcecode"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/*.r": true,
+			"**/.builder": true,
+			"**/.externalToolBuilders": true,
+			"**/.sonarlint": true,
+			"**/.vscode": false
+		},
+		"files.encoding": "iso88591",
+		"files.trimTrailingWhitespace": true,
+		"files.associations": {
+			"*.p": "abl",
+			"*.cls": "abl",
+			"*.w": "abl",
+			"*.i": "abl"
+		},
+		"editor.fontFamily": "Fira Code",
+		"editor.fontSize": 12,
+		"editor.fontLigatures": true,
+		"editor.fontWeight": 450,
+		"editor.formatOnPaste": true
+	}
+
+}

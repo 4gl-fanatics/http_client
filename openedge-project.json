@@ -1,0 +1,38 @@
+{
+  "name": "http_client",
+  "version": "1.0",
+  "oeversion": "12.6",
+  "graphicalMode": false,
+  "charset": "iso8859-1",
+  "extraParameters": "-cpcoll basic -zn -D 10000 -inp 32000 -tok 5000 ",
+  "buildPath": [
+    {
+      "type": "source",
+      "path": ".",
+      "includes": "**/**",
+      "excludes": ""
+    },
+    {
+      "type": "propath",
+      "path": "."
+    },
+    {
+      "type": "propath",
+      "path": "${DLC}\\src"
+    },
+    {
+      "type": "propath",
+      "path": "${DLC}\\gui\\netlib\\OpenEdge.Net.pl"
+    },
+    {
+      "type": "propath",
+      "path": "${DLC}\\gui"
+    }
+  ],
+  "numThreads": 2,
+  "dbConnections": [
+  ],
+  "procedures": [],
+  "profiles": [
+  ]
+}
