@@ -31,8 +31,6 @@ using Progress.Json.ObjectModel.* from propath.
 using OpenEdge.Net.HTTP.*.
 
 class server.MultipartWebHandler inherits WebHandler:
-    define temp-table eCustomer no-undo like Customer.
-    define dataset dsCustomer for eCustomer.
 
     /* Handler for unsupported methods
 
@@ -64,7 +62,6 @@ class server.MultipartWebHandler inherits WebHandler:
         define variable oPart as MessagePart no-undo.
         define variable oJson as JsonObject no-undo.
         define variable oFile as FileInputStream no-undo.
-        define variable oReq as IHttpRequest no-undo.
         define variable oHeader as HttpHeader no-undo.
 
         /* The multipart message - the "container" */
