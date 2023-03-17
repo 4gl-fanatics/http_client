@@ -1,7 +1,11 @@
-# http_client
+# http_client #
 HTTP Client  Workshop exercises
 
-Requires $DLC/*/netlib/OpenEdge.Net.pl on PROPATH
+## Requirements ##
+
+$DLC/*/netlib/OpenEdge.Net.pl on PROPATH
+
+A connection to Sports2000 for compiling `server/DatasetWebHandler.cls`
 
 ## Making requests ##
 

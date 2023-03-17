@@ -70,7 +70,7 @@ procedure create_multipart:
     oHeader = HttpHeaderBuilder:Build("Content-Disposition")
                     :Value("form-data")
                     :AddParameter("name", "photo")
-                    :AddParameter("fileName*", "person.png")
+                    :AddParameter("filename", "person.png")
                     :Header.
 
     oPart = new MessagePart("image/png", oFile).
@@ -104,7 +104,7 @@ procedure read_multipart:
     define variable iLoop as integer no-undo.
     define variable iCnt as integer no-undo.
 
-    oReq = RequestBuilder:Get("http://localhost:8810/web/multipart")
+    oReq = RequestBuilder:Get("http://localhost:8810/web/Multipart")
                 :Request.
 
     oResp = oHttpClient:Execute(oReq).

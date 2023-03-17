@@ -10,12 +10,12 @@
  *                                                                    *
  **********************************************************************/
 /*------------------------------------------------------------------------
-    File        : trouble_tracing.p
-    Purpose     : Troubleshooting using tracing
+    File        : accept.p
+    Purpose     : Set Accept header
     Syntax      :
     Description :
     Author(s)   : Peter Judge / Consultingwerk Ltd.
-    Created     : 2023-03-16
+    Created     : 2023-03-15
     Notes       :
   ----------------------------------------------------------------------*/
 @lowercase.
@@ -23,45 +23,39 @@
 block-level on error undo, throw.
 
 using OpenEdge.Net.HTTP.* from propath.
-using extending.* from propath.
-
-/* Needed for OE before 12.6
-OpenEdge.Net.HTTP.ClientBuilder:Registry:Put(get-class(IHttpClient):TypeName,
-get-class(HttpClientExt)).
-*/
-
-/*
-log-manager:logfile-name = session:temp-dir + 'trouble_tracing.log'.
-log-manager:logging-level = 5.
-log-manager:clear-log().
-*/
 
 define variable oHttpClient as IHttpClient no-undo.
 define variable oReq as IHttpRequest no-undo.
 define variable oResp as IHttpResponse no-undo.
-define variable oCredentials as Credentials no-undo.
+
+session:debug-alert = no .
+
+log-manager:logfile-name = session:temp-dir + 'accept.log'.
+log-manager:logging-level = 5.
+log-manager:clear-log().
+
 
 /* Make a request */
-oHttpClient = ClientBuilder:Build()
-                :AllowTracing(true)
-                /* Specify custom tracing; defaults to PROPATH */
-                :TracingConfig("troubleshooting/tracing.config")
-                :Client.
+oHttpClient = ClientBuilder:Build():Client.
 
-oCredentials = new Credentials("realm", "bob", "sofia").
 
-/* PROVIDE CREDENTIALS. We may not know what the authentication approach is, so let the HttpClient
-   figure it out. This will make 2 requests to the server. Both of these are captured in the trace data */
-oReq = RequestBuilder:Get("http://httpbin.org/basic-auth/bob/sofia")
-        :UsingCredentials(oCredentials)
-        /* Individual requests can programatically opt out of tracing
-        :AllowTracing(false) */
+/* This should fail with 403, and return JSON */
+oReq = RequestBuilder:Get("http://localhost:8810/not-there")
+        :AcceptJson()
         :Request.
 
-/* Make multiple requests */
 oResp = oHttpClient:Execute(oReq).
 
-oReq = RequestBuilder:Get("http://httpbin.org/get")
+message
+oResp:StatusCode skip
+oResp:ContentType skip
+oResp:ContentLength skip
+oResp:Entity
+view-as alert-box.
+
+/* This should fail with 403, and return HTML */
+oReq = RequestBuilder:Get("http://localhost:8810/not-there")
+        :AcceptHtml()
         :Request.
 
 /* Make multiple requests */
@@ -74,9 +68,18 @@ oResp:ContentLength skip
 oResp:Entity
 view-as alert-box.
 
-/*
-OUTPUT
-tmp/trouble_logging.log
-tmp/trace_<Mtime>.json
-*/
+/* This should fail with 403, and return HTML since the server cannot return XML */
+oReq = RequestBuilder:Get("http://localhost:8810/not-there")
+        :AcceptContentType("application/xml")
+        :Request.
+
+/* Make multiple requests */
+oResp = oHttpClient:Execute(oReq).
+
+message
+oResp:StatusCode skip
+oResp:ContentType skip
+oResp:ContentLength skip
+oResp:Entity
+view-as alert-box.
 
