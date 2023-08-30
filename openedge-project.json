@@ -1,16 +1,16 @@
 {
   "name": "http_client",
   "version": "1.0",
-  "oeversion": "12.6",
+  "oeversion": "12.7",
   "graphicalMode": false,
   "charset": "iso8859-1",
-  "extraParameters": "-cpcoll basic -zn -D 10000 -inp 32000 -tok 5000 ",
+  "extraParameters": "-cpcoll basic -zn -D 10000 -inp 32000 -tok 5000 -T tmp",
   "buildPath": [
     {
       "type": "source",
       "path": ".",
       "includes": "**/**",
-      "excludes": ""
+      "excludes": "img/**"
     },
     {
       "type": "propath",
@@ -31,6 +31,12 @@
   ],
   "numThreads": 2,
   "dbConnections": [
+    {
+      "name": "Sports2000",
+      "dumpFile": "C:/Work/SmartComponents4NET/127_64/DB/Sports2000/dump/sports2000.df",
+      "connect": "-db c:/Work/SmartComponents4NET/127_64/DB/sports2000/sports2000",
+      "aliases": []
+    }
   ],
   "procedures": [],
   "profiles": [

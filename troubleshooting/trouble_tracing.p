@@ -25,10 +25,10 @@ block-level on error undo, throw.
 using OpenEdge.Net.HTTP.* from propath.
 using extending.* from propath.
 
-/* Needed for OE before 12.6
+&if proversion begins "12.5":u  &then
 OpenEdge.Net.HTTP.ClientBuilder:Registry:Put(get-class(IHttpClient):TypeName,
-get-class(HttpClientExt)).
-*/
+                                             get-class(HttpClientExt)).
+&endif
 
 /*
 log-manager:logfile-name = session:temp-dir + 'trouble_tracing.log'.

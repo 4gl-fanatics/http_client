@@ -11,10 +11,10 @@
  **********************************************************************/
 /*------------------------------------------------------------------------
     File        : authentication_callback.p
-    Purpose     : SHows use of authentication callback
+    Purpose     : Shows use of authentication callback
     Syntax      :
     Description :
-    Author(s)   : Author / Consultingwerk Ltd.
+    Author(s)   : Peter Judge / Consultingwerk Ltd.
     Created     : 2023-03-15
     Notes       :
   ----------------------------------------------------------------------*/
@@ -23,7 +23,7 @@
 
 block-level on error undo, throw.
 
-using extending.* from propath.
+using security.* from propath.
 using OpenEdge.Core.*.
 using OpenEdge.Net.*.
 using OpenEdge.Net.HTTP.*.

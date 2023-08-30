@@ -26,7 +26,7 @@ using OpenEdge.Net.HTTP.* from propath.
 using Progress.Lang.* from propath.
 using OpenEdge.Net.HTTP.Filter.Auth.* from propath.
 
-class extending.AuthenticationPrompt implements IAuthFilterEventHandler:
+class security.AuthenticationPrompt implements IAuthFilterEventHandler:
 
     /** Event handler for the HttpCredentialRequest event.
 

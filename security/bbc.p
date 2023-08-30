@@ -11,7 +11,7 @@
  **********************************************************************/
 /*------------------------------------------------------------------------
     File        : bbc.p
-    Purpose     : Requests the BBC home page. By defautl, BBC.COM uses TLSv1.3
+    Purpose     : Requests the BBC home page. By default, BBC.COM uses TLSv1.3
                   which is not supported in OE 12.6 or earlier. This program forces
                   the connection to use TLSv1.2 or TLSv1.1
     Author(s)   : Peter Judge / Consultingwerk Ltd.
@@ -63,7 +63,7 @@ oRequest = RequestBuilder:Get(cUrl):Request.
 oResponse = oClient:Execute(oRequest).
 
 if oResponse:StatusCode eq 200 then
-  message "Completed" view-as alert-box information.
+    message "Completed" view-as alert-box information.
 else
     message "Error" oResponse:StatusReason view-as alert-box.
 
