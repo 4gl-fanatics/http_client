@@ -17,13 +17,10 @@
   ----------------------------------------------------------------------*/
 block-level on error undo, throw.
 
-using OpenEdge.Core.Assert.
-using OpenEdge.Core.StringConstant.
-using OpenEdge.Net.HTTP.Credentials.
-using OpenEdge.Net.HTTP.Filter.Auth.AuthenticationRequestFilter.
-using OpenEdge.Net.HTTP.HttpHeaderBuilder.
-using OpenEdge.Net.HTTP.IAuthenticatedRequest.
-using Progress.Lang.AppError.
+using OpenEdge.Core.* from propath.
+using OpenEdge.Net.HTTP.* from propath.
+using OpenEdge.Net.HTTP.Filter.Auth.* from propath.
+using Progress.Lang.* from propath.
 
 class security.BearerAuthenticationFilter inherits AuthenticationRequestFilter:
      /** Constructor

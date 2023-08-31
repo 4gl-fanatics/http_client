@@ -24,10 +24,10 @@
 block-level on error undo, throw.
 
 using security.* from propath.
-using OpenEdge.Core.*.
-using OpenEdge.Net.*.
-using OpenEdge.Net.HTTP.*.
-using OpenEdge.Net.HTTP.Filter.Writer.*.
+using OpenEdge.Core.* from propath.
+using OpenEdge.Net.* from propath.
+using OpenEdge.Net.HTTP.* from propath.
+using OpenEdge.Net.HTTP.Filter.Writer.* from propath.
 using Progress.Json.ObjectModel.* from propath.
 using Progress.Lang.* from propath.
 
