@@ -35,23 +35,31 @@ define variable oHttpClient as IHttpClient no-undo.
 define variable oReq as IHttpRequest no-undo.
 define variable oResp as IHttpResponse no-undo.
 
+OpenEdge.Net.HTTP.Filter.Writer.AuthenticationRequestWriterBuilder:Registry:Put(string(AuthenticationMethodEnum:Bearer),
+                                                                                get-class(BearerAuthenticationFilter)).
+
 /* Make a request */
 oHttpClient = ClientBuilder:Build():Client.
 
-oReq = RequestBuilder:Get("http://httpbin.org/basic-auth/bob/sofia")
+oReq = RequestBuilder:Get("http://httpbin.org/bearer")
         :AuthCallback(this-procedure)
-        /* ALT :AuthCallback(new AuthenticationPrompt()) */
         :Request.
 
-/* Make multiple requests */
 oResp = oHttpClient:Execute(oReq).
 
 message
 oResp:StatusCode skip
 oResp:ContentType skip
-oResp:ContentLength skip
-oResp:Entity
-view-as alert-box.
+oResp:ContentLength skip(2)
+string(cast(oResp:Entity, JsonObject):GetJsonText())
+view-as alert-box
+.
+
+catch err as Progress.Lang.Error:
+    message
+    err:GetMessage(1)
+    view-as alert-box.
+end catch.
 
 /** Event handler for the HttpCredentialRequest event.
 
@@ -64,9 +72,10 @@ procedure AuthFilter_HttpCredentialRequestHandler:
     /* password prompt here */
     message
         "prompt for user/pass for " poEventArgs:Realm
+    view-as alert-box title "IN PROCEDURE"
+    .
 
-    view-as alert-box title "IN PROCEDURE".
-
+    /* The Pasword is used for the token */
     poEventArgs:Credentials = new Credentials(poEventArgs:Realm, "bob", "sofia").
 
 end procedure.

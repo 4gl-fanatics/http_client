@@ -28,9 +28,9 @@ using OpenEdge.Net.* from propath.
 using OpenEdge.Net.HTTP.* from propath.
 using Progress.Json.ObjectModel.* from propath.
 
-define variable oHttpClient as IHttpClient no-undo.
 define variable oReq as IHttpRequest no-undo.
 define variable oResp as IHttpResponse no-undo.
+define variable oHttpClient as IHttpClient no-undo.
 
 oHttpClient = ClientBuilder:Build()
                     /* Run with and without this. The request to /get will send the cookies */
