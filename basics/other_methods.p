@@ -33,8 +33,6 @@ define variable oHttpClient as IHttpClient no-undo.
 define variable oReq as IHttpRequest no-undo.
 define variable oResp as IHttpResponse no-undo.
 define variable oJsonBody as JsonObject no-undo.
-define variable oFormBody as IStringStringMap no-undo.
-define variable oStringBody as OpenEdge.Core.String no-undo.
 
 /* Create once */
 oHttpClient = ClientBuilder:Build():Client.

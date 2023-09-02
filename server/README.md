@@ -41,7 +41,7 @@ The startup parameters must have the Sports2000 database added to it. Other prop
 The path to the Sports2000 database may differ if you did not create a new one.
 ```
 [AppServer.SessMgr.http-client-workshop]
-    agentStartupParam=-T "c:\work_stream\SmartComponentLibrary\Develop127\smartpas_stream\temp" -db c:\temp\sports2000
+    agentStartupParam=-T "${CATALINA_BASE}\temp" -db c:\temp\sports2000
 ```
 
 ### Web handler configuration, classic ###
