@@ -2,7 +2,7 @@ HTTP Client Workshop - Lab Exercises
 
 # Prerequisites #
 
-OpenEdge installed (11.7+, ideally 12.2.x or later) with a development license/
+OpenEdge installed (11.7+, ideally 12.2.x or later) with a development license.
 
 Familiarity with PDSOE.
 
@@ -211,22 +211,152 @@ Examples are available in `content_types/accept.p`.
 
 **Requires PASOE instance**
 
-The HTTP client supports writing and reading multipart messages. The `content_types/multipart.p` program is provided to illustrate the use of multipart messages:
+The HTTP client supports writing and reading multipart messages.
+
+The `content_types/multipart.p` program is provided to illustrate the use of multipart messages
 - In the `create_multipart` internal procedure, an instance of `OpenEdge.Net.MultipartEntity` is created with 2 parts (each instances of `OpenEdge.Net.MessagePart`). One part contains JSON data about a person, and the second a "photo" of the person.
 - In the `read_multipart` internal procedure, the PASOE instance returns a similar multipart message. The HTTP client creates an instance of `OpenEdge.Net.MultipartEntity` with the same 2 parts (each instances of `OpenEdge.Net.MessagePart`)
 
 
 ## Security ##
 
-HTTP
-security/basic_auth.p
-security/authentication_callback.p
-security/authentication_callback_bearer.p
-security/header.p
+There are 2 groups of exercises for the security topic: HTTP and TLS.
 
-TLS
-security/bbc.p
-security/sni.p
+### HTTP ###
+
+These exercises relate to application authentication using the HTTP `Authorization` header.
+
+Basic authentication base64-encodes a username and password. The first example provides credentials but does not know what form authentication scheme is used. In this case, there are actually 2 requests made, with the authentication being automatically resolved by the HTTP client.
+
+1. Create a new .P (optionally using the template procedure `template.p`)
+1. Create an HTTP client instance using the ClientBuilder.
+1. Define a variable for an `OpenEdge.Net.HTTP.Credentials` object.
+1. Create the credentials object: the constructor takes 3 arguments, a realm, username and password.
+    1. The domain and username must be have values (ie not blank)
+1. Create the request, using the RequestBuilder's `Get` method, to http://httpbin.org/basic-auth/<user-name>/<password>
+    1. The 2nd and 3rd path segments are the username and password; these must be the same as the values used for the credentials object
+    1. Call the `UsingCredentials(<credentials-object>)` method on the RequestBuilder
+1. Execute the request and inspect the response.
+    1. The responses `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* code is returned
+
+The second exercise assumes that the developer knows that basic authentication is in use. In this case, only 1 request is made - the credentials are added before the request is made.
+
+Examples are available in `security/basic_auth.p`.
+1. Using the existing .P
+1. Create another request, using the RequestBuilder's `Get` method, to http://httpbin.org/basic-auth/<user-name>/<password>
+    1. The 2nd and 3rd path segments are the username and password; these must be the same as the values used for the credentials object
+    1. Call the `UsingBasicAuthentication(<credentials-object>)` method on the RequestBuilder
+1. Execute the request and inspect the response.
+    1. The responses `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* code is returned
+
+The following exercise allows a developer or user to be prompted for credentials. This is done by means of a callback.
+
+1. Create a new .P (optionally using the template procedure `template.p`)
+1. Create an HTTP client instance using the ClientBuilder.
+1. Create the request, using the RequestBuilder's `Get` method, to http://httpbin.org/basic-auth/bob/sofia
+    1. The 2nd and 3rd path segments are the username and password
+    1. Call the `AuthCallback(new security.AuthenticationPrompt())` method on the RequestBuilder.
+1. Execute the request and inspect the response.
+    1. A "prompt for user/pass for  Fake Realm" and the requested URL should pop up. In a more realistic environment, this callback can provide a UI for the relevant credentials.
+    1. The responses `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* code is returned
+
+Notes:
+- The `security.AuthenticationPrompt` class has hard-coded values for the username and password. These can be changed; if they are, the URL must change too
+- Examples are available in `security/authentication_callback.p`.
+- The callback can also be in the form of an internal procedure. Copy the code below into the .P, and replace the `AuthCallback(new security.AuthenticationPrompt())` code with `AuthCallback(this-procedure)`.
+
+```
+/** Event handler for the HttpCredentialRequest event.
+
+    @param Object The filter object that publishes the event.
+    @param AuthenticationRequestEventArgs The event args for the event */
+procedure AuthFilter_HttpCredentialRequestHandler:
+    define input parameter poSender as Object no-undo.
+    define input parameter poEventArgs as AuthenticationRequestEventArgs no-undo.
+
+    /* password prompt here */
+    message
+        "prompt for user/pass for " poEventArgs:Realm
+
+    view-as alert-box title "IN PROCEDURE".
+
+    poEventArgs:Credentials = new Credentials(poEventArgs:Realm, "bob", "sofia").
+
+end procedure.
+```
+- The callback must implement the `OpenEdge.Net.HTTP.Filter.Auth.IAuthFilterEventHandler` interface. **Optionally**, create an entirely new class for this exercise. The method must create a Credentials object, and assign it to the method's event args' `Credentials` property.
+
+Credentials can also be added to a header; usually the `Authorization` header as a bearer or other similar token.
+1. Create a new .P (optionally using the template procedure `template.p`)
+1. Create an HTTP client instance using the ClientBuilder.
+1. Create the request, using the RequestBuilder's `Get` method, to http://httpbin.org/get
+    1. Call the `AddHeader("Authorization", "Bearer <value>")` method on the RequestBuilder.
+1. Execute the request and inspect the response.
+    1. The responses `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* status code is returned
+
+Notes:
+- There is no actual authentication happening in this exercise; it just illustrates the use of a header.
+- Examples are available in `security/header.p`.
+
+### TLS ###
+
+These exercises set the information needed to establish a TLS (HTTPS) connection, bu setting the correct TLS protocols, and the Server Name Indicator value for requests.
+
+The BBC website, by default, uses TLSv1.3. OpenEdge only supports this protocol in version 12.7 onwards. For earlier version of OpenEdge, TLS 1.2 should be used.
+
+For this exercise, the certificate at `cfg/globalsign-root-ca-r3.pem` must be imported into the OpenEge certificate store.
+
+To do so, open ProEnv, and run the `certutil` command.
+```
+proenv> certutil -import \path\to\repo\cfg\globalsign-root-ca-r3.pem
+```
+
+1. Create a new .P (optionally using the template procedure `template.p`)
+1. Define a variable (eg `cSslProtocols`)  that is CHARACTER EXTENT 2 .
+    1. Set the values of the extents to "TLSv1.2" and "TLSv1.1".
+1. Define a variable (eg `oLib`) that has a type of `OpenEdge.Net.HTTP.IHttpClientLibrary`.
+1. Create an instance of a client library using something like the below
+```
+<library-variable> = ClientLibraryBuilder:Build()
+                        :SetSSLProtocols(<character-extent-variable>)
+                        :Library.
+```
+1. Create an HTTP client instance using the ClientBuilder.
+    1. Call the `UsingLibrary(<library-variable>)` method on the ClientBuilder, passing in the library
+1. Create the request, using the RequestBuilder's `Get` method, to https://bbc.com
+1. Execute the request and inspect the response.
+    1. The responses `StatusCode` should be *200/OK*.
+    1. There should be no errors raised - and the request should complete reasonably quickly.
+1. Try running the request with the `SetSSLProtocols` call commented out or removed. An error should be raised in OpenEdge versions prior to 12.7.
+
+Examples are available in `security/bbc.p`.
+
+The SurveyMonkey server uses a ServerNameIndicator (SNI); this exercise adds the SNI to the request.
+
+For this exercise, the certificate at `cfg/amazon-root-ca-1.pem` must be imported into the OpenEge certificate store.
+
+To do so, open ProEnv, and run the `certutil` command.
+```
+proenv> certutil -import \path\to\repo\cfg\amazon-root-ca-1.pem
+```
+
+1. Create a new .P (optionally using the template procedure `template.p`)
+1. Define a variable (eg `oLib`) that has a type of `OpenEdge.Net.HTTP.IHttpClientLibrary`.
+1. Create an instance of a client library using something like the below
+```
+<library-variable> = ClientLibraryBuilder:Build()
+                        :ServerNameIndicator("api.surveymonkey.com")
+                        :Library.
+```
+1. Create an HTTP client instance using the ClientBuilder.
+    1. Call the `UsingLibrary(<library-variable>)` method on the ClientBuilder, passing in the library
+1. Create the request, using the RequestBuilder's `Get` method, to https://api.surveymonkey.com/v3/docs
+1. Execute the request and inspect the response.
+    1. The responses `StatusCode` should be *200/OK*.
+    1. There should be no errors raised - and the request should complete reasonably quickly.
+1. Try running the request with the `ServerNameIndicator` call commented out or removed. An error with a message of `336151568` or similar gibberish should be raised. Messages from SSL are often inscrutable and don't make much sense.
+
+Examples are available in `security/sni.p`.
 
 
 ## Troubleshooting ##
@@ -251,7 +381,7 @@ Extends/replaces the default HttpClient
 
 security/authentication_callback_bearer.p
 Adds a custom authentication filter for Bearer
-
+Examples are available in `security/authentication_callback_bearer.p`.
 
 
 ### Using a stateful client ###

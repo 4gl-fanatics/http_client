@@ -36,7 +36,8 @@ class security.AuthenticationPrompt implements IAuthFilterEventHandler:
                                 input poSender as Object,
                                 input poEventArgs as AuthenticationRequestEventArgs):
         message
-            "prompt for user/pass for " poEventArgs:Realm
+            "prompt for user/pass for " poEventArgs:Realm skip
+            "requested URL:" poEventArgs:Request:URI:ToString()
         view-as alert-box title "IN CLASS".
 
         poEventArgs:Credentials = new Credentials(poEventArgs:Realm, "bob", "sofia").
