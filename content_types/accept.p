@@ -39,7 +39,7 @@ log-manager:clear-log().
 oHttpClient = ClientBuilder:Build():Client.
 
 
-/* This should fail with 403, and return JSON */
+/* This should fail with 404, and return JSON */
 oReq = RequestBuilder:Get("http://localhost:8810/not-there")
         :AcceptJson()
         :Request.
@@ -53,7 +53,7 @@ oResp:ContentLength skip
 oResp:Entity
 view-as alert-box.
 
-/* This should fail with 403, and return HTML */
+/* This should fail with 404, and return HTML */
 oReq = RequestBuilder:Get("http://localhost:8810/not-there")
         :AcceptHtml()
         :Request.
@@ -68,9 +68,26 @@ oResp:ContentLength skip
 oResp:Entity
 view-as alert-box.
 
-/* This should fail with 403, and return HTML since the server cannot return XML */
+/* This should fail with 404, and return HTML since the server cannot return XML */
 oReq = RequestBuilder:Get("http://localhost:8810/not-there")
         :AcceptContentType("application/xml")
+        :Request.
+
+/* Make multiple requests */
+oResp = oHttpClient:Execute(oReq).
+
+message
+oResp:StatusCode skip
+oResp:ContentType skip
+oResp:ContentLength skip
+oResp:Entity
+view-as alert-box.
+
+/** SVG **/
+oReq = RequestBuilder:Get("http://httpbin.org/image")
+        /* Use this first, see the JSON payload returned
+        :AcceptContentType("image/svg+xml")
+        */
         :Request.
 
 /* Make multiple requests */

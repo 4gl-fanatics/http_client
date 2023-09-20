@@ -58,7 +58,7 @@ oResp:Entity
 view-as alert-box.
 
 if MimeTypeHelper:IsJson(oResp:ContentType) then
-    cast(oResp:Entity, JsonConstruct):WriteFile("resp.json", yes).
+    cast(oResp:Entity, JsonConstruct):WriteFile("resp1.json", yes).
 
 /** FORM FIELDS 1 **/
 
@@ -80,7 +80,7 @@ oResp:Entity
 view-as alert-box.
 
 if MimeTypeHelper:IsJson(oResp:ContentType) then
-    cast(oResp:Entity, JsonConstruct):WriteFile("resp.json", yes).
+    cast(oResp:Entity, JsonConstruct):WriteFile("resp2.json", yes).
 
 /** FORM FIELDS 2 **/
 oStringBody = new String("fldSentAt=" + iso-date(now) + "&fldSentBy=me").
@@ -117,4 +117,4 @@ oResp:Entity
 view-as alert-box.
 
 if MimeTypeHelper:IsJson(oResp:ContentType) then
-    cast(oResp:Entity, JsonConstruct):WriteFile("resp.json", yes).
+    cast(oResp:Entity, JsonConstruct):WriteFile("resp3.json", yes).

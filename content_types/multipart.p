@@ -104,7 +104,7 @@ procedure read_multipart:
     define variable iLoop as integer no-undo.
     define variable iCnt as integer no-undo.
 
-    oReq = RequestBuilder:Get("http://localhost:8810/web/Multipart")
+    oReq = RequestBuilder:Get("http://localhost:8810/web/multipart")
                 :Request.
 
     oResp = oHttpClient:Execute(oReq).
