@@ -188,12 +188,12 @@ This exercise sets the HTTP `Accept` header to influence the content returned fr
     1. Call the `AcceptJson()` method on the RequestBuilder.
 1. Execute the request and inspect the response.
     1. The response's `ContentType` property should be `application/json`.
-    1. The responses `StatusCode` should be 404.
+    1. The response's `StatusCode` should be 404.
 1. Create the request, using the RequestBuilder's `Get` method, to http://localhost:8810/not-there
     1. Call the `AcceptHtml()` method on the RequestBuilder.
 1. Execute the request and inspect the response.
     1. The response's `ContentType` property should be `text/html`.
-    1. The responses `StatusCode` should be 404.
+    1. The response's `StatusCode` should be 404.
 
 The RequestBuilder's `AcceptContentType(<content-type>)` method can also be used for more specific content types.
 1. Modify the current .P
@@ -205,7 +205,7 @@ The RequestBuilder's `AcceptContentType(<content-type>)` method can also be used
 1. Add `:AcceptContentType("image/svg+xml")` to the RequestBuilder
 1. Execute the request and inspect the response.
     1. The response's `ContentType` property should be `image/svg+xml`.
-    1. The responses `StatusCode` should be *200/OK*.
+    1. The response's `StatusCode` should be *200/OK*.
 
 Examples are available in `content_types/accept.p`.
 
@@ -237,9 +237,9 @@ Basic authentication base64-encodes a username and password. The first example p
     1. The 2nd and 3rd path segments are the username and password; these must be the same as the values used for the credentials object
     1. Call the `UsingCredentials(<credentials-object>)` method on the RequestBuilder
 1. Execute the request and inspect the response.
-    1. The responses `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* code is returned
+    1. The response's `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* code is returned
 
-The second exercise assumes that the developer knows that basic authentication is in use. In this case, only 1 request is made - the credentials are added before the request is made.
+The second exercise assumes that the developer knows that basic authentication is in use. In this case, only 1 request is made - the credentials are added before the request is made. This is known as preemptive authentication (ie the HTTP client does not need to wait to be asked for credentials).
 
 Examples are available in `security/basic_auth.p`.
 1. Using the existing .P
@@ -247,7 +247,7 @@ Examples are available in `security/basic_auth.p`.
     1. The 2nd and 3rd path segments are the username and password; these must be the same as the values used for the credentials object
     1. Call the `UsingBasicAuthentication(<credentials-object>)` method on the RequestBuilder
 1. Execute the request and inspect the response.
-    1. The responses `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* code is returned
+    1. The response's `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* code is returned
 
 The following exercise allows a developer or user to be prompted for credentials. This is done by means of a callback.
 
@@ -258,7 +258,7 @@ The following exercise allows a developer or user to be prompted for credentials
     1. Call the `AuthCallback(new security.AuthenticationPrompt())` method on the RequestBuilder.
 1. Execute the request and inspect the response.
     1. A "prompt for user/pass for  Fake Realm" and the requested URL should pop up. In a more realistic environment, this callback can provide a UI for the relevant credentials.
-    1. The responses `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* code is returned
+    1. The response's `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* code is returned
 
 Notes:
 - The `security.AuthenticationPrompt` class has hard-coded values for the username and password. These can be changed; if they are, the URL must change too
@@ -292,7 +292,7 @@ Credentials can also be added to a header; usually the `Authorization` header as
 1. Create the request, using the RequestBuilder's `Get` method, to http://httpbin.org/get
     1. Call the `AddHeader("Authorization", "Bearer <value>")` method on the RequestBuilder.
 1. Execute the request and inspect the response.
-    1. The responses `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* status code is returned
+    1. The response's `StatusCode` should be *200/OK*. If the username or password differs between the URL and the credentials object, a *401/Unauthorized* status code is returned
 
 Notes:
 - There is no actual authentication happening in this exercise; it just illustrates the use of a header.
@@ -325,7 +325,7 @@ proenv> certutil -import \path\to\repo\cfg\globalsign-root-ca-r3.pem
     1. Call the `UsingLibrary(<library-variable>)` method on the ClientBuilder, passing in the library
 1. Create the request, using the RequestBuilder's `Get` method, to https://bbc.com
 1. Execute the request and inspect the response.
-    1. The responses `StatusCode` should be *200/OK*.
+    1. The response's `StatusCode` should be *200/OK*.
     1. There should be no errors raised - and the request should complete reasonably quickly.
 1. Try running the request with the `SetSSLProtocols` call commented out or removed. An error should be raised in OpenEdge versions prior to 12.7.
 
@@ -352,42 +352,131 @@ proenv> certutil -import \path\to\repo\cfg\amazon-root-ca-1.pem
     1. Call the `UsingLibrary(<library-variable>)` method on the ClientBuilder, passing in the library
 1. Create the request, using the RequestBuilder's `Get` method, to https://api.surveymonkey.com/v3/docs
 1. Execute the request and inspect the response.
-    1. The responses `StatusCode` should be *200/OK*.
+    1. The response's `StatusCode` should be *200/OK*.
     1. There should be no errors raised - and the request should complete reasonably quickly.
 1. Try running the request with the `ServerNameIndicator` call commented out or removed. An error with a message of `336151568` or similar gibberish should be raised. Messages from SSL are often inscrutable and don't make much sense.
 
 Examples are available in `security/sni.p`.
 
-
 ## Troubleshooting ##
 
-troubleshooting/trouble_logging.p
-troubleshooting/trouble_tracing.p
-troubleshooting/ssl.p
+These exercises show how to troubleshoot the HTTP client, using LOG-MANAGER logging and client tracing.
 
+Any of the previously-created .P's can be used for this exercise.
+1. Add ABL code to enable the `LOG-MANAGER` logging. The HTTP uses the logging level.
+
+```
+log-manager:logfile-name = "trouble_logging.log".
+log-manager:logging-level = 6.  /* Level 6 dumps packets from the server; 5 is usually enough */
+log-manager:clear-log().
+```
+1. Run the .P again.
+1. After the program completes its execution, the following files should be created
+    1. `trouble_logging.log` in the current working directory
+    1. `request-raw.txt` in the session temp-dir (-T). This is, by default, something like `c:\work\openedge`. This contains the HTTP request, as sent to the server.
+    1. `response-data-received.txt` in the session temp-dir (-T). This contains the text of the HTTP response, as received from the server.
+    1. `response-data-chunk-00001.txt` in the session temp-dir (-T). This will not be written if the logging level is 5 or below. There may be multiple `response-data-chunk-*.txt` files; this depends on the
+1. Open the `trouble_logging.log` log in PDSOE or another text editor.
+    1. A variety of information is written into the log. The "Connect" messages similar to the below can be very useful in debugging connection issues.
+
+```
+[23/09/20@18:04:58.739-0400] P-045012 T-006592 1 4GL LogMgrWrtr     [OE.N.HTTP.HttpClient DEBUG] Connect: -H httpbin.org -S 80
+```
+    1. There are a variety of timings and message size lines logged.
+1. The `response-data-received.txt` file is useful if the Entity object is not of the OOABL type expected, for example.
+
+Examples are available in `troubleshooting/trouble_logging.p`.
+
+The [HTTP Tracing feature was added in OpenEdge 12.5](https://docs.progress.com/bundle/openedge-whats-new/page/Whats-New-in-OpenEdge-12.5.html#ariaid-title33). The code for this exercise will fail to compile and run for OpenEdge versions prior to 12.5.0.
+
+Any of the previously-created .P's can be used for this exercise.
+1. On the HTTP instance creation line (ie ClientBuilder), add
+    1. A call to the `AllowTracing(true)` method, passing in TRUE
+    1. A call to the `TracingConfig("troubleshooting/tracing.config")` method, with `troubleshooting/tracing.config` as an input parameter.
+1. Run the .P again
+1. One or more JSON files named `trace_<integer>.json` will be created  in the working directory.
+    1. Open these in a text editor. They contain information about the request, like the various headers, cookies, and certain timings
+
+Examples are available in `troubleshooting/trouble_tracing.p`.
 
 ## Customisation ##
 
-extending/use_error_status_filter.p
-Status codes throw error
+These exercises implement extensions and customisations to the standard HTTP client behaviour.
+
+### Custom behaviour for certain status codes ###
+
+The HTTP client does not throw any errors for "error" status codes, like *404/Not found* or *501/Internal Server Error* . This exercise extends the HTTP client to throw an error when those status codes are returned.
+
+1. The provided `extending.ErrorStatusFilter` class is an implementation of the `OpenEdge.Net.HTTP.IHttpMessageWriter` interface. This class has some boilerplate code. The important methods to inspect are
+    1. `method public void Write(input poData as Object)` , which is called by the HTTP client with the response to a call.
+    1. `method public void Flush()` , which is intended to perform any work. In this class, an error is thrown.
+1. Create a new .P (optionally using the template procedure `template.p`)
+1. Register the provided `extending.ErrorStatusFilter` class as a handler for *404/Not Found* status codes
+    1. Add the line `StatusCodeWriterBuilder:Registry:Put("404", get-class(extending.ErrorStatusFilter)).` . This will result in any requests that result in a 404 status code to run the `extending.ErrorStatusFilter` class.
+    1. A similar line can be added for any individual HTTP status code. Groups/ranges of status codes are not supported.
+    1. This would typically be done at session startup
+1. Create an HTTP client instance using the ClientBuilder.
+1. Create the request, using the RequestBuilder's `Get` method, to http://httpbin.org/status/404
+1. Execute the request and inspect the response.
+1. Add a `catch` block (if one does not yet exist).
+1. Running the .P will result in an error message saying `"Request to http://httpbin.org/status/404 returned status code 404",`
+
+Examples are available in `extending/use_error_status_filter.p`.
+
+### Custom behaviour for ProDataSet responses ###
 
 **Requires PASOE instance**
 
-extending/use_dataset_entity_writer.p
-Returns a ProDataSet from JSON
+This exercise adds a customised message writer that knows how to convert a JSON response into a (dynamic) ProDataSet.
 
-troubleshooting/trouble_tracing.p
-Extends/replaces the default HttpClient
+1. The provided `extending.ErrorDatasetEntityWriter` class inherits from the `OpenEdge.Net.HTTP.Filter.Payload.MessageWriter` class.
+    1. `method override public int64 Write(poData as Object)` , which is called by the HTTP client library, passing in the received body.
+    1. This method converts the response body into JSON, and then reads the JSON into a dynamically-created ProDataSet.
+1. Create a new .P (optionally using the template procedure `template.p`)
+1. Register the provided `extending.ErrorDatasetEntityWriter` class as a handler for the *application/prodataset+json* content type.
+    1. Add the line `EntityWriterRegistry:Registry:Put("application/prodataset+json":u, get-class(DatasetEntityWriter)).` This results in any responses with that content type being processed by the custom writer.
+    1. This would typically be done at session startup
+1. Create an HTTP client instance using the ClientBuilder.
+1. Create the request, using the RequestBuilder's `Get` method, to http://localhost:8810/web/Customers/1
+    1. Any customer number in the Sports2000 Customer table can be used
+1. Execute the request
+1. The customer entity writer creates an instance of `OpenEdge.Core.WidgetHandle`, which holds the ProDataSet handle
+    1. This handle is accessible via the `Value` property.
+    1. The dataset can be accessed using code similar to the below, or passed into another business logic procedure as needed.
+```
+if type-of(oResp:Entity, WidgetHandle) then do:
+    define variable hDataset as handle no-undo.
 
-security/authentication_callback_bearer.p
-Adds a custom authentication filter for Bearer
+    hDataset = cast(oResp:Entity, WidgetHandle):Value.
+
+    hBuffer = hDataset:get-buffer-handle(1).
+    hBuffer:find-first().
+
+    message
+      hBuffer::CustNum skip /* This number will match the last path segment of the URL */
+      hBuffer::Name skip
+    view-as alert-box.
+end.
+```
+Examples are available in `extending/use_dataset_entity_writer.p`.
+
+### Custom handling for a "bearer" authentication scheme ###
+
+This exercise adds a customer handler for the "Bearer" authentication scheme.
+
+1. The provided `security.BearerAuthenticationFilter` class inherits from the `OpenEdge.Net.HTTP.Filter.Auth.AuthenticationRequestFilter` class.
+    1. The `method override protected void AddAuthentication()` method is called by the HTTP client library, adds an `Authorization` header to a request.
+    1. The value used for the Bearer token is the value of the `Password` property of a Credentials object (see the **Security** exercises)
+1. Create a new .P (optionally using the template procedure `template.p`)
+1. Register the provided `security.BearerAuthenticationFilter` class as a handler for the *Bearer* authentication scheme.
+    1. Add the line `OpenEdge.Net.HTTP.Filter.Writer.AuthenticationRequestWriterBuilder:Registry:Put(string(AuthenticationMethodEnum:Bearer), get-class(security.BearerAuthenticationFilter)).`.
+    1. This would typically be done at session startup
+1. Create an HTTP client instance using the ClientBuilder.
+1. Create the request, using the RequestBuilder's `Get` method, to http://httpbin.org/bearer
+    1. Add an authentication callback to the RequestBuilder. This can be use one of the methods described in the Security exercises (eg internal procedure, separate class)
+1. Execute the request and inspect the response.
+    1. A "prompt for user/pass for Bearer" (and also the requested URL) should pop up. In a more realistic environment, this callback can provide a UI for the relevant credentials.
+    1. The response's `StatusCode` should be *200/OK*.
+
 Examples are available in `security/authentication_callback_bearer.p`.
 
-
-### Using a stateful client ###
-
-basics_cookies.p
-
-## Timeouts and retries ###
-
-misc/timeouts_and_retries.p

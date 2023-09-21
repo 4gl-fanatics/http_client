@@ -26,15 +26,10 @@ using OpenEdge.Net.HTTP.* from propath.
 using extending.* from propath.
 
 &if proversion begins "12.5":u  &then
+/* Workaround for a bug fixed in 12.6 */
 OpenEdge.Net.HTTP.ClientBuilder:Registry:Put(get-class(IHttpClient):TypeName,
                                              get-class(HttpClientExt)).
 &endif
-
-/*
-log-manager:logfile-name = session:temp-dir + 'trouble_tracing.log'.
-log-manager:logging-level = 5.
-log-manager:clear-log().
-*/
 
 define variable oHttpClient as IHttpClient no-undo.
 define variable oReq as IHttpRequest no-undo.
